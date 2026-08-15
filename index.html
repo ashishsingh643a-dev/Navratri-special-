@@ -3,375 +3,435 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indian Road Radio | Cinematic Experience</title>
+    <title>INDIAN ROAD RADIO | Cinematic Journey</title>
+    <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@300;400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@300;400;600;800&family=Noto+Sans+Devanagari:wght@400;700;900&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --cinematic-orange: #ff8c00;
-            --dusty-brown: #3e2723;
-            --highway-grey: #263238;
+            --highway-black: #0a0a0c;
+            --glass: rgba(255, 255, 255, 0.08);
         }
 
-        body {
+        body, html {
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
-            background: #000;
+            background: var(--highway-black);
             font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
             color: white;
         }
 
-        /* Cinematic Parallax Road */
-        .scene-container {
+        /* --- Cinematic Scene Layers --- */
+        .world {
             position: relative;
             height: 100vh;
             width: 100vw;
-            background: linear-gradient(to bottom, #1a1a2e, #16213e);
-            transition: background 2s ease;
+            transition: all 1.5s ease-in-out;
+            overflow: hidden;
         }
 
-        .night-mode .scene-container {
-            background: linear-gradient(to bottom, #020107, #0b0e14);
-        }
-
-        .layer {
+        .sky {
             position: absolute;
-            width: 200%;
+            inset: 0;
+            background: linear-gradient(to bottom, #ff7e5f, #feb47b); /* Day */
+            transition: background 2s ease;
+            z-index: 1;
+        }
+
+        .night .sky {
+            background: linear-gradient(to bottom, #020107, #1a1a2e);
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
             height: 100%;
-            background-repeat: repeat-x;
-            background-position: bottom;
-            animation: drive linear infinite;
+            background: transparent;
+            opacity: 0;
+            transition: opacity 2s;
+            z-index: 2;
+        }
+        .night .stars {
+            opacity: 0.5;
+            background-image: radial-gradient(white 1px, transparent 0);
+            background-size: 50px 50px;
         }
 
-        @keyframes drive {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
+        /* --- Parallax Road System --- */
+        .road-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40%;
+            background: #111;
+            z-index: 10;
+            perspective: 500px;
+            overflow: hidden;
         }
 
-        .sky { height: 100%; z-index: 1; transition: opacity 2s; }
-        .mountains { background: url('https://www.transparenttextures.com/patterns/black-linen.png'); opacity: 0.3; bottom: 20%; height: 40%; z-index: 2; animation-duration: 60s; }
-        .road { 
-            height: 30%; 
-            bottom: 0; 
-            background: #1a1a1a; 
-            z-index: 10; 
-            border-top: 4px solid #333;
-            box-shadow: 0 -20px 50px rgba(0,0,0,0.5);
+        .road-surface {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(90deg, #111, #111 48%, #222 50%, #111 52%);
+            transform: rotateX(40deg);
+            transform-origin: top;
         }
+
         .road-lines {
             position: absolute;
-            top: 50%;
-            width: 100%;
-            height: 10px;
-            background: repeating-linear-gradient(90deg, transparent, transparent 50px, #ffd700 50px, #ffd700 100px);
-            animation: drive 1s linear infinite;
+            top: 0;
+            left: 50%;
+            width: 10px;
+            height: 200%;
+            background: repeating-linear-gradient(to bottom, transparent, transparent 50px, #ffd700 50px, #ffd700 100px);
+            transform: translateX(-50%);
+            animation: moveRoad 1s linear infinite;
         }
 
-        /* Vehicle Animations */
-        .vehicle-box {
+        @keyframes moveRoad {
+            from { transform: translateX(-50%) translateY(-100px); }
+            to { transform: translateX(-50%) translateY(0); }
+        }
+
+        /* --- Vehicle Physics --- */
+        .vehicle-wrapper {
             position: absolute;
             bottom: 15%;
-            left: 15%;
-            z-index: 50;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .bounce { animation: bounce 0.5s infinite alternate; }
-        @keyframes bounce {
-            from { transform: translateY(0); }
-            to { transform: translateY(-5px); }
+        .vibration {
+            animation: vibrate 0.2s infinite alternate;
+        }
+        @keyframes vibrate {
+            from { transform: translateY(0) rotate(0.5deg); }
+            to { transform: translateY(-3px) rotate(-0.5deg); }
         }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
+        /* --- UI Elements --- */
+        .glass-panel {
+            background: rgba(15, 15, 20, 0.7);
+            backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            border-radius: 24px;
         }
 
-        .horn-btn {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #444, #111);
-            border: 4px solid #333;
-            box-shadow: 0 10px 0 #000, 0 15px 20px rgba(0,0,0,0.5);
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        .horn-btn:active {
-            transform: translateY(8px);
-            box-shadow: 0 2px 0 #000;
-        }
-
-        /* Typographic Styles */
-        .hindi-title {
+        .hindi-hero {
             font-family: 'Noto Sans Devanagari', sans-serif;
             font-weight: 900;
-            letter-spacing: 2px;
-            text-shadow: 0 0 20px rgba(255, 140, 0, 0.6);
+            text-shadow: 0 0 30px rgba(255, 140, 0, 0.5);
+            line-height: 1;
         }
 
-        .truck-art-text {
-            font-family: 'Bungee', cursive;
-            color: #ffde03;
-            -webkit-text-stroke: 1px #ff0000;
+        .horn-trigger:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 50px rgba(255, 140, 0, 0.4);
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        /* Screen Shake for Horn */
+        .shake {
+            animation: shakeScreen 0.2s 2;
+        }
+        @keyframes shakeScreen {
+            0% { transform: translate(1px, 1px); }
+            50% { transform: translate(-2px, -2px); }
+            100% { transform: translate(1px, 1px); }
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        input[type="range"] { accent-color: var(--cinematic-orange); }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo } = React;
+        const { useState, useEffect, useRef } = React;
 
-        // ========================================
-        // CONFIGURATION & DEMO DATA
-        // ========================================
+        // --- Vehicle Configurations ---
         const VEHICLES = {
-            BUS: { id: 'bus', name: 'लाल परी', sub: 'BUS DRIVER PLAYLIST', icon: '🚌', color: '#e63946', hornFreq: 150 },
-            TRUCK: { id: 'truck', name: 'राजा हिंदुस्तानी', sub: 'TRUCK DRIVER PLAYLIST', icon: '🚛', color: '#ffbe0b', hornFreq: 80 },
-            AUTO: { id: 'auto', name: 'शेरू ऑटो', sub: 'AUTO DRIVER PLAYLIST', icon: '🛺', color: '#fb5607', hornFreq: 400 },
-            TAXI: { id: 'taxi', name: 'काली पीली', sub: 'TAXI DRIVER PLAYLIST', icon: '🚕', color: '#ffea00', hornFreq: 300 },
-            TRACTOR: { id: 'tractor', name: 'खेत सम्राट', sub: 'TRACTOR DRIVER PLAYLIST', icon: '🚜', color: '#38b000', hornFreq: 60 }
+            BUS: { 
+                id: 'bus', 
+                name: 'लाल परी', 
+                sub: 'BUS DRIVER PLAYLIST', 
+                icon: '🚌', 
+                color: '#e63946', 
+                horn: 120,
+                desc: 'The lifeline of rural highways.'
+            },
+            TRUCK: { 
+                id: 'truck', 
+                name: 'राजा हिंदुस्तानी', 
+                sub: 'TRUCK DRIVER PLAYLIST', 
+                icon: '🚛', 
+                color: '#f9c74f', 
+                horn: 80,
+                desc: 'King of the golden quadrilateral.'
+            },
+            AUTO: { 
+                id: 'auto', 
+                name: 'शेरू ऑटो', 
+                sub: 'AUTO DRIVER PLAYLIST', 
+                icon: '🛺', 
+                color: '#fb5607', 
+                horn: 350,
+                desc: 'Nimble city-to-highway cruiser.'
+            },
+            TAXI: { 
+                id: 'taxi', 
+                name: 'काली पीली', 
+                sub: 'TAXI DRIVER PLAYLIST', 
+                icon: '🚕', 
+                color: '#333533', 
+                horn: 300,
+                desc: 'Classic nostalgic urban carrier.'
+            },
+            TRACTOR: { 
+                id: 'tractor', 
+                name: 'खेत सम्राट', 
+                sub: 'TRACTOR DRIVER PLAYLIST', 
+                icon: '🚜', 
+                color: '#43aa8b', 
+                horn: 60,
+                desc: 'The heavy-duty soul of India.'
+            },
+            BIKE: { 
+                id: 'bike', 
+                name: 'बुलेट राजा', 
+                sub: 'RIDER PLAYLIST', 
+                icon: '🏍️', 
+                color: '#277da1', 
+                horn: 450,
+                desc: 'Wind in your hair, road in your soul.'
+            }
         };
 
         const INITIAL_PLAYLIST = [
-            { id: 1, title: "Highway Melodies", artist: "Indian Road Radio", duration: "3:45", type: 'demo' },
-            { id: 2, title: "Dusty Horizons", artist: "Nostalgia Beats", duration: "4:20", type: 'demo' }
+            { id: 1, title: "Highway Dhun", artist: "Indian Road Radio", duration: "3:45" },
+            { id: 2, title: "Dusty Sunsets", artist: "Rural Beats", duration: "4:12" },
+            { id: 3, title: "The Midnight Ride", artist: "Golden Hour Collective", duration: "5:20" }
         ];
 
         const App = () => {
-            const [hasStarted, setHasStarted] = useState(false);
+            const [isStarted, setIsStarted] = useState(false);
             const [vehicle, setVehicle] = useState(VEHICLES.BUS);
-            const [customName, setCustomName] = useState(localStorage.getItem('irr_name') || vehicle.name);
+            const [customName, setCustomName] = useState(localStorage.getItem('irr_v_name') || vehicle.name);
             const [isNight, setIsNight] = useState(false);
             const [isPlaying, setIsPlaying] = useState(false);
             const [playlist, setPlaylist] = useState(INITIAL_PLAYLIST);
-            const [currentTrackIdx, setCurrentTrackIdx] = useState(0);
-            const [volume, setVolume] = useState(70);
+            const [currentIdx, setCurrentIdx] = useState(0);
             const [progress, setProgress] = useState(0);
-            const [speed, setSpeed] = useState(40);
+            const [volume, setVolume] = useState(0.7);
             const [isAmbience, setIsAmbience] = useState(true);
+            const [shake, setShake] = useState(false);
+            const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
 
-            const audioRef = useRef(null);
-            const hornOscillator = useRef(null);
             const audioCtx = useRef(null);
+            const audioRef = useRef(null);
 
-            // Initialize Audio Context on user gesture
-            const startExperience = () => {
-                audioCtx.current = new (window.AudioContext || window.webkitAudioContext)();
-                setHasStarted(true);
-            };
+            useEffect(() => {
+                const timer = setInterval(() => setCurrentTime(new Date().toLocaleTimeString()), 1000);
+                return () => clearInterval(timer);
+            }, []);
 
-            // Horn Logic (Web Audio Synthesis)
-            const playHorn = () => {
-                if (!audioCtx.current) return;
+            // --- Interactive Horn Logic (Web Audio API) ---
+            const triggerHorn = () => {
+                if (!audioCtx.current) audioCtx.current = new (window.AudioContext || window.webkitAudioContext)();
+                
                 const osc = audioCtx.current.createOscillator();
                 const gain = audioCtx.current.createGain();
                 
-                osc.type = vehicle.id === 'truck' ? 'sawtooth' : 'square';
-                osc.frequency.setValueAtTime(vehicle.hornFreq, audioCtx.current.currentTime);
+                osc.type = vehicle.id === 'truck' || vehicle.id === 'tractor' ? 'sawtooth' : 'square';
+                osc.frequency.setValueAtTime(vehicle.horn, audioCtx.current.currentTime);
                 
                 gain.gain.setValueAtTime(0.1, audioCtx.current.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.current.currentTime + 0.5);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.current.currentTime + 0.6);
                 
                 osc.connect(gain);
                 gain.connect(audioCtx.current.destination);
                 
                 osc.start();
-                osc.stop(audioCtx.current.currentTime + 0.5);
-
-                // Screen Shake effect
-                document.getElementById('scene').style.animation = 'shake 0.2s 2';
-                setTimeout(() => { document.getElementById('scene').style.animation = ''; }, 200);
+                osc.stop(audioCtx.current.currentTime + 0.6);
+                
+                setShake(true);
+                setTimeout(() => setShake(false), 200);
             };
 
-            // Handle Local Upload
-            const handleUpload = (e) => {
+            // --- Handle Local Music Upload ---
+            const handleMusicUpload = (e) => {
                 const files = Array.from(e.target.files);
                 const newTracks = files.map(file => ({
                     id: Date.now() + Math.random(),
-                    title: file.name.replace(/\.[^/.]+$/, ""),
-                    artist: "Local Upload",
+                    title: file.name.split('.')[0],
+                    artist: "Local Storage",
                     url: URL.createObjectURL(file),
-                    type: 'local'
+                    duration: "Local"
                 }));
                 setPlaylist([...playlist, ...newTracks]);
-                alert("Music added to playlist responsibly.");
             };
 
-            const currentTrack = playlist[currentTrackIdx];
+            const currentTrack = playlist[currentIdx];
+
+            if (!isStarted) {
+                return (
+                    <div className="h-screen w-screen flex flex-col items-center justify-center bg-black p-6 text-center">
+                        <div className="mb-12">
+                            <h1 className="text-6xl md:text-9xl font-black text-orange-500 mb-2 tracking-tighter" style={{fontFamily: 'Bungee'}}>INDIAN ROAD RADIO</h1>
+                            <p className="text-gray-400 tracking-[0.3em] uppercase text-sm">Experience the soul of the Indian Highway</p>
+                        </div>
+                        <button 
+                            onClick={() => setIsStarted(true)}
+                            className="px-12 py-5 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-full text-2xl transition-all hover:scale-105 active:scale-95 shadow-[0_0_50px_rgba(234,88,12,0.4)]"
+                        >
+                            START JOURNEY
+                        </button>
+                        <div className="mt-12 max-w-md text-xs text-gray-600 leading-relaxed">
+                            PLEASE PLAY MUSIC RESPONSIBLY. ONLY UPLOAD CONTENT YOU OWN OR HAVE PERMISSION TO USE. THIS APP DOES NOT VERIFY COPYRIGHT OWNERSHIP.
+                        </div>
+                    </div>
+                );
+            }
 
             return (
-                <div className={`h-screen w-screen overflow-hidden ${isNight ? 'night-mode' : ''}`}>
+                <div className={`world ${isNight ? 'night' : ''} ${shake ? 'shake' : ''}`}>
+                    {/* --- ENVIRONMENT --- */}
+                    <div className="sky"></div>
+                    <div className="stars"></div>
                     
-                    {!hasStarted ? (
-                        <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black">
-                            <h1 className="text-5xl md:text-8xl truck-art-text mb-8 text-center px-4">INDIAN ROAD RADIO</h1>
-                            <button 
-                                onClick={startExperience}
-                                className="px-12 py-6 bg-orange-600 hover:bg-orange-500 text-white rounded-full text-2xl font-bold tracking-widest transition-all hover:scale-110 shadow-2xl"
-                            >
-                                START JOURNEY
-                            </button>
-                            <p className="mt-8 text-gray-400 font-light italic">Wear headphones for the best experience</p>
+                    {/* Parallax Road */}
+                    <div className="road-container">
+                        <div className="road-surface">
+                            <div className="road-lines" style={{animationDuration: isPlaying ? '0.6s' : '0s'}}></div>
                         </div>
-                    ) : (
-                        <>
-                            {/* TOP BAR */}
-                            <div className="absolute top-0 left-0 w-full z-50 p-6 flex justify-between items-center pointer-events-none">
-                                <div className="glass p-4 pointer-events-auto">
-                                    <h2 className="text-xs uppercase tracking-widest opacity-70">Experience</h2>
-                                    <h1 className="text-xl font-bold">INDIAN ROAD RADIO</h1>
-                                </div>
+                    </div>
 
-                                <div className="flex gap-4 pointer-events-auto">
-                                    <div className="glass px-6 py-2 flex items-center gap-4">
-                                        <span className="text-sm font-mono tracking-tighter">{speed} KM/H</span>
-                                        <div className="h-4 w-[1px] bg-white/20"></div>
-                                        <span className="text-sm font-mono uppercase">{new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                                    </div>
-                                    <button 
-                                        onClick={() => setIsNight(!isNight)}
-                                        className="glass px-6 py-2 hover:bg-white/10 transition-colors"
-                                    >
-                                        {isNight ? '🌙 NIGHT' : '☀️ DAY'}
-                                    </button>
+                    {/* Scenic Details (Dust/Haze) */}
+                    <div className="absolute inset-0 z-[5] pointer-events-none opacity-30" 
+                         style={{background: 'radial-gradient(circle, transparent, #000)'}}></div>
+
+                    {/* --- TOP HUD --- */}
+                    <div className="absolute top-0 left-0 w-full p-8 z-50 flex justify-between items-center pointer-events-none">
+                        <div className="glass-panel px-6 py-3 pointer-events-auto">
+                            <div className="text-[10px] tracking-[0.3em] opacity-50 uppercase">Broadcasting Now</div>
+                            <div className="font-bold">INDIAN ROAD RADIO</div>
+                        </div>
+
+                        <div className="flex gap-4 pointer-events-auto">
+                            <div className="glass-panel px-6 py-3 flex gap-6 font-mono text-sm items-center">
+                                <div className="flex flex-col items-center">
+                                    <span className="opacity-40 text-[10px]">SPEED</span>
+                                    <span>{isPlaying ? '65' : '0'} KM/H</span>
+                                </div>
+                                <div className="w-px h-6 bg-white/10"></div>
+                                <div className="flex flex-col items-center">
+                                    <span className="opacity-40 text-[10px]">TIME</span>
+                                    <span>{currentTime}</span>
                                 </div>
                             </div>
+                            <button 
+                                onClick={() => setIsNight(!isNight)}
+                                className="glass-panel px-6 py-3 hover:bg-white/10 transition-colors"
+                            >
+                                {isNight ? '🌙 NIGHT' : '☀️ DAY'}
+                            </button>
+                        </div>
+                    </div>
 
-                            {/* MAIN SCENE */}
-                            <div id="scene" className="scene-container">
-                                {/* Sky */}
-                                <div className={`absolute inset-0 transition-opacity duration-1000 ${isNight ? 'opacity-0' : 'opacity-100'}`} 
-                                     style={{background: 'linear-gradient(to bottom, #ff9e22, #ff5e3a)'}}></div>
-                                
-                                <div className="mountains layer" style={{animationDuration: '100s'}}></div>
-                                
-                                {/* Road Section */}
-                                <div className="road">
-                                    <div className="road-lines" style={{animationDuration: `${2/ (speed/40)}s`}}></div>
-                                </div>
+                    {/* --- THE VEHICLE --- */}
+                    <div className="vehicle-wrapper text-center">
+                        <div className={`text-[120px] md:text-[220px] leading-none select-none ${isPlaying ? 'vibration' : ''}`}>
+                            {vehicle.icon}
+                        </div>
+                        <div className="mt-[-20px]">
+                            <h2 className="hindi-hero text-6xl md:text-8xl tracking-tighter text-white">
+                                {customName}
+                            </h2>
+                            <p className="tracking-[0.5em] text-orange-500 font-bold uppercase text-xs mt-4">
+                                {vehicle.sub}
+                            </p>
+                        </div>
+                    </div>
 
-                                {/* Dynamic Vehicle */}
-                                <div className="vehicle-box bounce" style={{left: '20%'}}>
-                                    <div className="relative group">
-                                        <div className="text-[120px] md:text-[200px] leading-none select-none">
-                                            {vehicle.icon}
-                                        </div>
-                                        {/* Truck Art Decoration overlay for Bus/Truck */}
-                                        {(vehicle.id === 'truck' || vehicle.id === 'bus') && (
-                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center">
-                                                <span className="bg-red-600 text-white text-[10px] md:text-xs px-2 py-1 font-bold rounded shadow-lg">
-                                                    HORN OK PLEASE
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    
-                                    <div className="mt-4 text-center">
-                                        <div className="text-4xl md:text-6xl hindi-title truck-art-text">
-                                            {customName}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Visual Dust Effects */}
-                                <div className="absolute bottom-[10%] left-0 w-full h-20 opacity-20 pointer-events-none bg-gradient-to-t from-orange-900 to-transparent"></div>
-                            </div>
-
-                            {/* UI DASHBOARD */}
-                            <div className="absolute bottom-0 left-0 w-full p-6 z-[60] grid grid-cols-1 md:grid-cols-12 gap-6 items-end pointer-events-none">
-                                
-                                {/* 1. Vehicle Selector */}
-                                <div className="md:col-span-3 glass p-4 pointer-events-auto overflow-y-auto max-h-[300px]">
-                                    <h3 className="text-xs font-bold uppercase opacity-50 mb-4 tracking-widest">Choose Your Ride</h3>
-                                    <div className="grid grid-cols-1 gap-2">
-                                        {Object.values(VEHICLES).map(v => (
-                                            <button 
-                                                key={v.id}
-                                                onClick={() => {
-                                                    setVehicle(v);
-                                                    setCustomName(v.name);
-                                                }}
-                                                className={`flex items-center gap-4 p-3 rounded-xl transition-all ${vehicle.id === v.id ? 'bg-orange-600' : 'hover:bg-white/5'}`}
-                                            >
-                                                <span className="text-2xl">{v.icon}</span>
-                                                <div className="text-left">
-                                                    <div className="text-sm font-bold leading-tight">{v.name}</div>
-                                                    <div className="text-[10px] opacity-70 uppercase tracking-tighter">{v.id}</div>
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <div className="mt-4 pt-4 border-t border-white/10">
-                                        <input 
-                                            type="text" 
-                                            placeholder="Apni ride ka naam..."
-                                            className="w-full bg-black/40 border border-white/20 rounded px-3 py-2 text-sm focus:outline-none focus:border-orange-500"
-                                            onChange={(e) => {
-                                                setCustomName(e.target.value);
-                                                localStorage.setItem('irr_name', e.target.value);
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* 2. Horn & Ambience Center */}
-                                <div className="md:col-span-5 flex flex-col items-center gap-6">
-                                    <div className="flex gap-8 items-center pointer-events-auto">
-                                        <div className="text-center">
-                                            <button 
-                                                onMouseDown={playHorn}
-                                                className="horn-btn flex items-center justify-center text-4xl shadow-orange-900/20"
-                                            >
-                                                📢
-                                            </button>
-                                            <p className="mt-2 text-[10px] tracking-widest uppercase opacity-50">Press Horn</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* 3. Music Player Dashboard */}
-                                <div className="md:col-span-4 glass p-6 pointer-events-auto">
-                                    <div className="flex items-center gap-4 mb-6">
-                                        <div className={`w-16 h-16 rounded-lg flex items-center justify-center text-3xl shadow-inner ${isPlaying ? 'animate-pulse' : ''}`} style={{background: vehicle.color}}>
-                                            📻
-                                        </div>
-                                        <div className="overflow-hidden">
-                                            <h4 className="font-bold truncate text-lg uppercase tracking-tight">{currentTrack.title}</h4>
-                                            <p className="text-xs opacity-60 uppercase">{currentTrack.artist} • {vehicle.sub}</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Progress Bar */}
-                                    <div className="mb-6">
-                                        <div className="h-1 bg-white/10 rounded-full overflow-hidden cursor-pointer" onClick={(e) => {
-                                            const rect = e.currentTarget.getBoundingClientRect();
-                                            const x = e.clientX - rect.left;
-                                            setProgress((x / rect.width) * 100);
-                                        }}>
-                                            <div className="h-full bg-orange-500" style={{width: `${progress}%`}}></div>
-                                        </div>
-                                        <div className="flex justify-between text-[10px] mt-1 opacity-50 font-mono">
-                                            <span>02:14</span>
-                                            <span>{currentTrack.duration}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Controls */}
-                                    <div className="flex justify-between items-center mb-6">
-                                        <button className="opacity-50 hover:opacity-100" onClick={() => setCurrentTrackIdx(prev => prev > 0 ? prev - 1 : prev)}>⏮</button>
-                                        <button 
-                                            onClick={() => setIsPlaying(!isPlaying)}
+                    {/* --- MAIN DASHBOARD (UI) --- */}
+                    <div className="absolute bottom-0 left-0 w-full p-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-end z-[100]">
                         
+                        {/* 1. Vehicle Choice */}
+                        <div className="md:col-span-3 glass-panel p-5 overflow-y-auto max-h-[350px] hide-scrollbar">
+                            <h3 className="text-[10px] uppercase tracking-widest font-bold opacity-40 mb-4">Select Ride</h3>
+                            <div className="grid grid-cols-1 gap-2">
+                                {Object.values(VEHICLES).map(v => (
+                                    <button 
+                                        key={v.id}
+                                        onClick={() => { setVehicle(v); setCustomName(v.name); }}
+                                        className={`flex items-center gap-4 p-3 rounded-2xl transition-all ${vehicle.id === v.id ? 'bg-orange-600' : 'hover:bg-white/5'}`}
+                                    >
+                                        <span className="text-2xl">{v.icon}</span>
+                                        <div className="text-left">
+                                            <div className="font-bold text-sm leading-none mb-1">{v.name}</div>
+                                            <div className="text-[9px] opacity-60 uppercase">{v.desc}</div>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-white/10">
+                                <input 
+                                    type="text" 
+                                    maxLength="15"
+                                    placeholder="Enter ride name..."
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                                    onChange={(e) => {
+                                        setCustomName(e.target.value || vehicle.name);
+                                        localStorage.setItem('irr_v_name', e.target.value);
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* 2. Steering & Horn (Center) */}
+                        <div className="md:col-span-5 flex flex-col items-center">
+                            <button 
+                                onMouseDown={triggerHorn}
+                                className="horn-trigger w-32 h-32 md:w-44 md:h-44 rounded-full glass-panel flex flex-col items-center justify-center border-4 border-white/10 shadow-2xl group transition-all"
+                            >
+                                <div className="text-4xl group-active:scale-125 transition-transform">📢</div>
+                                <div className="text-[10px] font-bold tracking-[0.2em] opacity-40 mt-2">HORN</div>
+                            </button>
+                            <div className="mt-6 flex gap-8">
+                                <div className="flex flex-col items-center">
+                                    <button 
+                                        onClick={() => setIsAmbience(!isAmbience)}
+                                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isAmbience ? 'bg-white text-black' : 'bg-white/10 text-white'}`}
+                                    >
+                                        💨
+                                    </button>
+                                    <span className="text-[8px] mt-2 opacity-50 uppercase font-bold tracking-widest">Wind</span>
+                                </div>
+                                <div className="flex flex-col items-center">
+                                    <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-bold text-xs">
+                                        OK
+                                    </div>
+                                    <span className="text-[8px] mt-2 opacity-50 uppercase font-bold tracking-widest">Status</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 3. Music Player (Right) */}
+                        <div className="md:col-span-4 glass-panel p-6">
+                            <div className="flex items-center gap-5 mb-6">
+                                <div 
+                                    className={`w-20 h-20 rounded-2xl flex items-center justify-center text-4xl shadow-2xl ${isPlaying ? 'animate-pulse' : ''}`}
+                                    style={{ background: `linear-gradient(135deg, ${vehicle.colo
